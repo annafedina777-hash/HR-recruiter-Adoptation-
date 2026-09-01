@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дорожная карта — Менеджер по подбору персонала · ТД «ЛФБ»</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2F1EC;
+    --ink:#1B1D1F;
+    --ink-soft:#5A5F63;
+    --asphalt:#26303D;
+    --line:#D9D5C8;
+    --green:#2F8F5B;
+    --green-soft:#E4F1E9;
+    --yellow:#D89A2C;
+    --yellow-soft:#FBF0DC;
+    --red:#C1503F;
+    --red-soft:#F7E6E2;
+    --grey:#AFAAA0;
+    --grey-soft:#E9E7E1;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:28px 20px 80px;}
+  h1,h2,h3{font-family:'Oswald', sans-serif;letter-spacing:.02em;margin:0;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+
+  /* ---------- header ---------- */
+  header.top{margin-bottom:26px;}
+  header.top h1{font-size:30px;text-transform:uppercase;color:var(--asphalt);}
+  header.top .sub{font-size:15px;color:var(--ink-soft);font-style:italic;margin-top:4px;}
+
+  .grade-note{
+    margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px 16px;font-size:13px;color:var(--ink-soft);
+  }
+  .grade-note b{color:var(--ink);}
+  .grade-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px;}
+  .grade-table td{padding:4px 8px 4px 0;color:var(--ink-soft);}
+  .grade-table tr.here td{color:var(--ink);font-weight:600;}
+  .grade-table td:first-child{font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+
+  .id-card{
+    margin-top:18px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px 20px;
+  }
+  @media (max-width:560px){ .id-card{grid-template-columns:1fr;} }
+  .id-field label{
+    display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px;
+  }
+  .id-field input{
+    width:100%;border:none;border-bottom:1px solid var(--line);background:transparent;
+    font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;padding:3px 0;color:var(--ink);
+  }
+  .id-field input:focus{outline:none;border-bottom-color:var(--asphalt);}
+  .id-field.static div{font-size:14.5px;padding:3px 0;}
+
+  /* ---------- route progress ---------- */
+  .route{
+    position:relative;margin:30px 0 8px;padding:0 6px;
+  }
+  .route-track{
+    position:relative;height:6px;background:var(--grey-soft);border-radius:4px;overflow:visible;
+  }
+  .route-fill{
+    position:absolute;left:0;top:0;height:100%;background:var(--green);border-radius:4px;
+    width:0%;transition:width .5s ease;
+  }
+  .route-truck{
+    position:absolute;top:-18px;left:0%;transform:translateX(-50%) scaleX(-1);font-size:20px;
+    transition:left .5s ease;
+  }
+  .route-stops{display:flex;justify-content:space-between;margin-top:14px;}
+  .route-stop{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);text-align:center;flex:1;}
+
+  /* ---------- phases overview ---------- */
+  .phases-overview{display:flex;gap:10px;margin:26px 0 6px;}
+  .phase-ov{flex:1;border-radius:var(--radius);padding:12px 14px;color:#fff;}
+  .phase-ov-1{background:#3E5064;flex-grow:1;}
+  .phase-ov-2{background:#2F6B54;flex-grow:1;}
+  .phase-ov-3{background:#8A5A2B;flex-grow:3;}
+  .phase-ov-num{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.8;margin-bottom:3px;}
+  .phase-ov-title{font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;text-transform:uppercase;margin-bottom:3px;}
+  .phase-ov-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;opacity:.9;}
+  @media (max-width:560px){ .phases-overview{flex-direction:column;} .phase-ov{flex-grow:1 !important;} }
+
+  /* ---------- phase banner (between day groups) ---------- */
+  .phase-banner{
+    margin-top:34px;margin-bottom:-4px;padding:12px 16px;border-radius:var(--radius);
+    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+  }
+  .phase-banner.p1{background:#3E5064;}
+  .phase-banner.p2{background:#2F6B54;}
+  .phase-banner.p3{background:#8A5A2B;}
+  .phase-banner-title{font-family:'Oswald',sans-serif;color:#fff;font-size:16px;text-transform:uppercase;letter-spacing:.02em;}
+  .phase-banner-sub{font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.85);font-size:11.5px;}
+  .route-stop b{display:block;color:var(--ink);font-size:13px;font-family:'IBM Plex Sans',sans-serif;font-weight:600;}
+  .route-pct{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);text-align:right;margin-top:2px;}
+
+  /* ---------- day sections ---------- */
+  .day{
+    margin-top:26px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;overflow:hidden;
+  }
+  .day.reserve{border-style:dashed;}
+  .day-head{
+    display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;user-select:none;
+    background:var(--asphalt);color:#fff;
+  }
+  .day.reserve .day-head{background:#8A5A2B;}
+  .day-head .badge{
+    font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;
+    background:rgba(255,255,255,.14);border-radius:50%;width:30px;height:30px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .day-head h2{font-size:16px;color:#fff;flex:1;text-transform:uppercase;}
+  .day-head .count{font-family:'IBM Plex Mono',monospace;font-size:12px;opacity:.85;white-space:nowrap;}
+  .day-head .chev{transition:transform .25s ease;font-size:13px;}
+  .day.open .day-head .chev{transform:rotate(180deg);}
+  .day-body{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+  .day.open .day-body{max-height:4000px;}
+
+  .task{
+    display:flex;gap:12px;padding:14px 16px;border-top:1px solid var(--line);
+  }
+  .task.policy{background:var(--yellow-soft);}
+  .status-btn{
+    flex-shrink:0;width:26px;height:26px;border-radius:50%;border:2px solid var(--grey);
+    background:#fff;cursor:pointer;margin-top:2px;position:relative;transition:.15s ease;
+  }
+  .status-btn[data-state="progress"]{background:var(--yellow);border-color:var(--yellow);}
+  .status-btn[data-state="done"]{background:var(--green);border-color:var(--green);}
+  .status-btn[data-state="done"]::after{
+    content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:14px;font-weight:700;
+  }
+  .task-body{flex:1;min-width:0;}
+  .task-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px;}
+  .task-title{font-weight:600;font-size:14.5px;}
+  .tag-test{
+    font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    background:var(--asphalt);color:#fff;padding:2px 6px;border-radius:4px;
+  }
+  .task-desc{font-size:13.5px;color:var(--ink-soft);}
+  .task-desc em{color:var(--ink-soft);}
+  .state-label{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-soft);margin-top:6px;
+  }
+  .note-row{margin-top:8px;}
+  .note-row input{
+    width:100%;max-width:320px;border:none;border-bottom:1px dashed var(--line);
+    background:transparent;font-size:12.5px;padding:3px 0;color:var(--ink);
+  }
+  .note-row input::placeholder{color:#b9b5aa;}
+  .note-row input:focus{outline:none;border-bottom-color:var(--asphalt);}
+
+  /* ---------- assessment ---------- */
+  .section-title{margin-top:44px;margin-bottom:6px;font-size:20px;text-transform:uppercase;color:var(--asphalt);}
+  .section-note{font-size:13.5px;color:var(--ink-soft);margin-bottom:18px;}
+
+  .assess-card{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;
+  }
+  .assess-top{display:flex;gap:10px;align-items:baseline;}
+  .assess-num{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:#fff;background:var(--asphalt);
+    border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .assess-title{font-weight:600;font-size:14.5px;}
+  .assess-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin-top:10px;font-size:12.5px;color:var(--ink-soft);}
+  @media (max-width:560px){.assess-grid{grid-template-columns:1fr;}}
+  .assess-grid .lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#8b877c;display:block;margin-bottom:2px;}
+  .verdict-row{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap;}
+  select.verdict{
+    font-family:'IBM Plex Sans',sans-serif;font-size:13px;padding:6px 10px;border-radius:20px;
+    border:1px solid var(--line);background:var(--grey-soft);color:var(--ink);cursor:pointer;
+  }
+  select.verdict[data-v="ok"]{background:var(--green-soft);border-color:var(--green);color:#1d5b3c;}
+  select.verdict[data-v="partial"]{background:var(--yellow-soft);border-color:var(--yellow);color:#7a5817;}
+  select.verdict[data-v="no"]{background:var(--red-soft);border-color:var(--red);color:#7a3327;}
+  .verdict-row input.comment{
+    flex:1;min-width:160px;border:none;border-bottom:1px dashed var(--line);background:transparent;
+    font-size:12.5px;padding:4px 0;color:var(--ink);
+  }
+  .verdict-row input.comment:focus{outline:none;border-bottom-color:var(--asphalt);}
+
+  /* ---------- final verdict ---------- */
+  .final-card{
+    background:var(--asphalt);color:#fff;border-radius:var(--radius);padding:20px;margin-top:22px;
+  }
+  .final-card h3{color:#fff;font-size:16px;text-transform:uppercase;margin-bottom:12px;}
+  .final-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+  .final-row select{
+    font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;
+  }
+  .final-row textarea{
+    width:100%;min-height:56px;border-radius:8px;border:none;padding:8px 10px;font-family:'IBM Plex Sans',sans-serif;
+    font-size:13.5px;resize:vertical;
+  }
+  .final-sign{display:flex;gap:24px;margin-top:14px;font-size:12.5px;color:#cfd3d8;flex-wrap:wrap;}
+  .final-sign b{color:#fff;display:block;font-size:13.5px;}
+  .final-sign input{
+    background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.3);color:#fff;
+    font-size:13.5px;font-family:'IBM Plex Sans',sans-serif;padding:2px 0;width:100%;
+  }
+  .final-sign input::placeholder{color:#8b93a0;}
+  .final-sign input:focus{outline:none;border-bottom-color:#fff;}
+
+  /* ---------- footer ---------- */
+  footer{margin-top:40px;font-size:11px;color:#918d81;line-height:1.6;}
+  .reset-btn{
+    margin-top:18px;background:none;border:1px solid var(--line);color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 14px;border-radius:20px;cursor:pointer;
+  }
+  .reset-btn:hover{border-color:var(--red);color:var(--red);}
+  .save-hint{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#a39f93;margin-top:6px;min-height:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">ООО ТД «ЛФБ» · Отдел найма и обучения</div>
+    <h1>Дорожная карта на тестовый период</h1>
+    <div class="sub">Стажёру на должность менеджера по подбору персонала · до 5 рабочих дней</div>
+
+    <div class="grade-note">
+      Стандартный срок тестового периода для этой должности — <b>2 рабочих дня</b> (дни 1–2 ниже). Дни 3–5 отмечены <b>*</b> — это резерв: используется, только если стажёру по факту нужно больше времени, или наставник считает нужным повторить материал, в пределах максимума 5 дней из ППК «Тестовый период».
+    </div>
+
+    <div class="id-card">
+      <div class="id-field">
+        <label>ФИО стажёра</label>
+        <input id="employeeName" type="text" placeholder="Впишите имя">
+      </div>
+      <div class="id-field static">
+        <label>Должность</label>
+        <div>Менеджер по подбору персонала</div>
+      </div>
+      <div class="id-field">
+        <label>Менеджер по адаптации</label>
+        <input id="mpaName" type="text" placeholder="ФИО МпА">
+      </div>
+      <div class="id-field">
+        <label>Наставник</label>
+        <input id="mentorName" type="text" placeholder="ФИО наставника">
+      </div>
+      <div class="id-field">
+        <label>Дата выхода на тестовый период</label>
+        <input id="startDate" type="date">
+      </div>
+      <div class="id-field">
+        <label>Руководитель (отдел найма и обучения)</label>
+        <input id="managerName" type="text" placeholder="ФИО руководителя">
+      </div>
+    </div>
+  </header>
+
+  <div class="phases-overview">
+    <div class="phase-ov phase-ov-1">
+      <div class="phase-ov-num">Этап 1</div>
+      <div class="phase-ov-title">Обучение</div>
+      <div class="phase-ov-meta">День 1</div>
+    </div>
+    <div class="phase-ov phase-ov-2">
+      <div class="phase-ov-num">Этап 2</div>
+      <div class="phase-ov-title">Практика подбора</div>
+      <div class="phase-ov-meta">День 2 · стандартный срок</div>
+    </div>
+    <div class="phase-ov phase-ov-3">
+      <div class="phase-ov-num">Этап 3</div>
+      <div class="phase-ov-title">Резерв — по необходимости</div>
+      <div class="phase-ov-meta">Дни 3–5* · сверх стандарта</div>
+    </div>
+  </div>
+
+  <div class="route">
+    <div class="route-track">
+      <div class="route-fill" id="routeFill"></div>
+      <div class="route-truck" id="routeTruck">🚶</div>
+    </div>
+    <div class="route-stops">
+      <div class="route-stop" style="flex:1"><b>День 1</b>Обучение</div>
+      <div class="route-stop" style="flex:1"><b>День 2</b>Практика подбора</div>
+      <div class="route-stop" style="flex:1"><b>День 3*</b>Резерв: практика</div>
+      <div class="route-stop" style="flex:1"><b>День 4*</b>Резерв: разбор ошибок</div>
+      <div class="route-stop" style="flex:1"><b>День 5*</b>Резерв: итоги</div>
+    </div>
+    <div class="route-pct" id="routePct">0% пройдено</div>
+  </div>
+
+  <div id="days"></div>
+
+  <h2 class="section-title">Практические задания для оценки соответствия должности</h2>
+  <p class="section-note">Показывают, готов ли стажёр самостоятельно вести подбор. Соответствуют ПЗ-1 – ПЗ-5 программы тестового периода. Оценку по каждому пункту ставит МпА или наставник по её поручению.</p>
+  <div id="assessments"></div>
+
+  <div class="final-card">
+    <h3>Итоговое заключение</h3>
+    <div class="final-row">
+      <select id="finalVerdict">
+        <option value="">Итоговый статус…</option>
+        <option value="ok">Одобрен</option>
+        <option value="partial">Одобрен условно</option>
+        <option value="no">Не одобрен</option>
+      </select>
+    </div>
+    <textarea id="finalComment" placeholder="Комментарий: что требует доработки, рекомендации на испытательный срок…"></textarea>
+    <div class="final-sign">
+      <div><b>Руководитель отдела найма и обучения</b><input id="finalSignName" type="text" placeholder="ФИО"></div>
+      <div id="finalDateShown"><b>—</b>Дата заключения</div>
+    </div>
+  </div>
+
+  <button class="reset-btn" id="resetBtn">Сбросить прогресс</button>
+  <div class="save-hint" id="saveHint">&nbsp;</div>
+
+  <footer>
+    ©2026 ООО ТД «ЛФБ». Все авторские права защищены законом.<br>
+    Данный документ является частью коммерческой тайны. Никакая часть этой публикации не может быть воспроизведена или передана в любой форме или любыми средствами без разрешения владельца авторских прав.
+  </footer>
+</div>
+
+<script>
+(function(){
+  const DAYS = [
+    {
+      id:'d1', title:'ЗАДАЧИ НА 1 ДЕНЬ — ОБУЧЕНИЕ', reserve:false,
+      tasks:[
+        {id:'d1-1', title:'Welcome-тренинг и знакомство с командой', desc:'Экскурсия по офису, знакомство с коллегами и руководителем. При необходимости в этот же день назначается наставник.'},
+        {id:'d1-2', title:'Оформление документов о приёме', desc:'Паспорт, СНИЛС, ИНН, реквизиты банковской карты. Оформление на тестовый период — по договору ГПХ или ученическому договору, форму определяет отдел кадров.'},
+        {id:'d1-3', title:'Дресс-код и правила компании', policy:true, desc:'Дресс-код, неформальные правила, кодекс компании — общее знакомство со средой, в которой предстоит работать.'},
+        {id:'d1-4', title:'ППК-1: положения по политике компании', policy:true, desc:'Общее знакомство с пакетом положений по политике компании на удалённом сервере — не разбирать все документы подробно, только ключевые темы (в т.ч. схема потока частиц, ЦКП, должностные папки). По итогам — Тест 1, 20 минут, письменно, без подсказок и документа перед глазами.'},
+        {id:'d1-5', title:'Должностная инструкция поста', policy:true, desc:'Изучить свою ДИ: продукт поста, схема потока частиц применительно к вашей роли, глоссарий — не все разделы, только эти. По итогам — Тест 2, 15 минут.'},
+        {id:'d1-6', title:'Обзор папки поста HR1', desc:'Обзорно ознакомиться с папкой поста, не изучая каждый документ подробно — понять структуру и что где искать.'},
+        {id:'d1-7', title:'Запрос доступов', desc:'Написать письмо руководителю отдела найма и обучения с запросом доступа в Friendwork и на hh.ru, указав ФИО и рабочую почту.'},
+        {id:'d1-8', title:'Воронка подбора персонала: этапы', desc:'Изучить этапы воронки подбора персонала и понять, кто за что отвечает на каждом этапе — по «Инструкции Работа с воронкой подбора персонала».'},
+        {id:'d1-9', title:'Вакансия в работу (ПЗ-1, часть 1)', desc:'Получить у руководителя вакансию, изучить информацию о ней и объявление на hh.ru, сформировать список уточняющих вопросов и отправить руководителю.'},
+        {id:'d1-10', title:'Черновик скрипта интервью (ПЗ-1, часть 2)', desc:'Составить черновик скрипта телефонного интервью по своей вакансии: приветствие/представление, вопросы по резюме, ответы на типовые вопросы кандидата, приглашение на собеседование. Отправить руководителю на проверку. Не называть кандидату суммы без согласования.'},
+        {id:'d1-11', title:'Обратная связь МпА', desc:'Написать менеджеру по адаптации по структуре: что выполнено, что нет и почему, хватило ли информации и поддержки, впечатления от дня.'},
+      ]
+    },
+    {
+      id:'d2', title:'ЗАДАЧИ НА 2 ДЕНЬ — ПРАКТИКА ПОДБОРА', reserve:false,
+      tasks:[
+        {id:'d2-1', title:'«Что такое наём» и «Что такое сорсинг»', desc:'Изучить оба документа: наём (рекрутинг) — деятельность по поиску и подбору кандидатов на вакансии в целом; сорсинг — привлечение пассивных кандидатов через системную работу с массивами данных. По итогам — Тест 3, 10 минут, оба документа.'},
+        {id:'d2-2', title:'Площадки размещения вакансий, функции и квота', desc:'Изучить, на каких площадках размещаются вакансии (в т.ч. «Стандарт+» на HeadHunter и Jobers для линейного персонала при малом числе откликов на HH) и функции/квоту менеджера по подбору. По итогам — Тест 4, 15 минут, оба документа.'},
+        {id:'d2-3', title:'Разбор откликов в Friendwork (ПЗ-2)', desc:'Под наблюдением наставника разобрать все отклики по своей вакансии: отделить нерелевантные (с указанием причины из справочника причин отказа) от релевантных, список отправить руководителю.'},
+        {id:'d2-4', title:'Разбор процесса подбора с МпА', desc:'Встреча с менеджером по адаптации или руководителем: разбор этапов процесса подбора, в частности — телефонного интервью.'},
+        {id:'d2-5', title:'Телефонные интервью: час под наблюдением, дальше сами (ПЗ-3)', desc:'Внести отказы нерелевантным кандидатам в Friendwork по готовым причинам отказа. Первый час звонков — под наблюдением наставника, строго по согласованному вчера скрипту. Дальше звоните самостоятельно — наставник рядом, если нужна помощь.'},
+        {id:'d2-6', title:'«Что делать, если нет откликов» и «Документы для приёма»', desc:'Изучить: что делать в первую очередь при низкой конверсии вакансии (сначала — мониторинг рынка, не поднимать зарплату сразу), и какие 9 документов входят в обязательный список для трудоустройства. По итогам — Тест 5, 15 минут, оба документа.'},
+        {id:'d2-7', title:'Обратная связь МпА', desc:'Написать менеджеру по адаптации итоги второго дня.'},
+      ]
+    },
+    {
+      id:'d3', title:'ДЕНЬ 3* — РЕЗЕРВ: ПРОДОЛЖЕНИЕ ПРАКТИКИ ПОДБОРА', reserve:true,
+      tasks:[
+        {id:'d3-1', title:'Продолжение откликов и интервью (ПЗ-3, продолжение)', desc:'Тот же процесс, что и в день 2: разбор откликов и самостоятельные телефонные интервью по вакансии со второго дня. Наставник рядом, если нужна помощь.'},
+        {id:'d3-2', title:'«КП кандидатам»', desc:'Изучить текст-заготовку для продажи вакансии кандидату — пригодится в разговоре и переписке. По итогам — Тест 6, 10 минут.'},
+        {id:'d3-3', title:'Вторая вакансия — новый цикл (ПЗ-4)', desc:'По завершении задач по первой вакансии получить у руководителя новую вакансию и повторить цикл: изучение вакансии → вопросы руководителю → черновик скрипта интервью.'},
+        {id:'d3-4', title:'Разбор откликов по второй вакансии (ПЗ-4, продолжение)', desc:'Разобрать отклики по второй вакансии самостоятельно — теперь уже быстрее и с меньшим числом вопросов, чем в первом цикле.'},
+        {id:'d3-5', title:'Резерв: закрытие вопросов по тестам 1–6', desc:'При наличии свободного времени — самостоятельно изучать папку поста; иначе — использовать время на закрытие вопросов по пройденным тестам.'},
+      ]
+    },
+    {
+      id:'d4', title:'ДЕНЬ 4* — РЕЗЕРВ: РАЗБОР ОШИБОК И ИТОГОВЫЙ ЦИКЛ', reserve:true,
+      tasks:[
+        {id:'d4-1', title:'Разбор ошибок по тестам 1–6', desc:'Повторно пройти вопросы тестов, где были ошибки, вместе с наставником.'},
+        {id:'d4-2', title:'Полный цикл по одному отклику (ПЗ-5)', desc:'Самостоятельно, под наблюдением наставника, провести полный цикл по одному отклику: от разбора резюме по критериям «Инструкции Отбор резюме» до приглашения на собеседование по готовому скрипту, без импровизации.'},
+        {id:'d4-3', title:'Текущий подбор по назначенным вакансиям', desc:'Продолжение текущего подбора по своим вакансиям, обратная связь наставнику по каждому кандидату.'},
+      ]
+    },
+    {
+      id:'d5', title:'ДЕНЬ 5* — РЕЗЕРВ: ИТОГИ ТЕСТОВОГО ПЕРИОДА', reserve:true,
+      tasks:[
+        {id:'d5-1', title:'Продолжение подбора, наблюдения наставника', desc:'Продолжение текущего подбора; наставник фиксирует наблюдения в «Чек-листе курирования стажёра».'},
+        {id:'d5-2', title:'Беседа с руководителем отдела найма', desc:'Разбор чек-листа курирования, обратная связь по итогам тестового периода.'},
+        {id:'d5-3', title:'Итоговое решение', desc:'Одобрен / не одобрен — решение принимает руководитель отдела найма и обучения на основании чек-листа курирования, результатов тестов 1–6, наблюдений наставника по ПЗ-1–5 и личной беседы. Фиксируется в поле «Заключение по работнику».'},
+      ]
+    },
+  ];
+
+  const ASSESS = [
+    {title:'ПЗ-1. Подготовка к телефонному интервью', kpi:'Качество чернового скрипта и вопросов руководителю', crit:'В скрипте есть все 4 части: приветствие/представление, вопросы по резюме, ответы на типовые вопросы кандидата, приглашение на собеседование. Вопросы руководителю не банальны («а какая зарплата»), а по графику, формату работы, требованиям. Скрипт не советует называть суммы без согласования.'},
+    {title:'ПЗ-2. Разбор откликов в Friendwork', kpi:'Полнота и корректность отбора кандидатов', crit:'Все поступившие отклики разобраны, для каждого нерелевантного указана причина именно из справочника причин отказа, а не общая формулировка. Ни один отклик не остался неразобранным дольше 2–3 дней.'},
+    {title:'ПЗ-3. Телефонные интервью — час под наблюдением, потом сами', kpi:'Дисциплина скрипта и корректность внесения данных', crit:'В первый час наставник подтверждает: стажёр не отступает от согласованного скрипта и не называет кандидату условия/суммы без согласования. Дальше стажёр звонит самостоятельно — наставник доступен, но не при каждом звонке. Комментарий по каждому звонку в Friendwork содержит 5 элементов: дата действия, суть действия, результат, планируемое действие, дата следующего шага.'},
+    {title:'ПЗ-4. Повтор цикла по второй вакансии', kpi:'Самостоятельность и скорость на втором цикле', crit:'Выполнены те же критерии, что в ПЗ-1 и ПЗ-2, но стажёр обращается к наставнику заметно реже и только по существу.'},
+    {title:'ПЗ-5. Итоговый полный цикл по одному отклику', kpi:'Готовность работать без прямого контроля наставника', crit:'Резюме оценено по критериям «Инструкции Отбор резюме», звонок проведён по готовому скрипту без импровизации, результат корректно внесён в Friendwork. Наставник только наблюдает, не подсказывает.'},
+  ];
+
+  const STATES = ['none','progress','done'];
+  const STATE_LABEL = {none:'Не начато', progress:'В процессе', done:'Готово'};
+
+  let state = {
+    employeeName:'', mpaName:'', mentorName:'', managerName:'', startDate:'', tasks:{}, notes:{},
+    assess:{}, assessComment:{}, finalVerdict:'', finalComment:'', finalSignName:'', finalDate:''
+  };
+
+  function allTaskIds(){ return DAYS.flatMap(d=>d.tasks.map(t=>t.id)); }
+
+  const PHASE_BANNERS = {
+    0: { cls:'p1', title:'Этап 1 · Обучение ППК и должностной инструкции', sub:'День 1 · теория и первые тесты' },
+    1: { cls:'p2', title:'Этап 2 · Практика подбора', sub:'День 2 · стандартный срок завершается здесь — воронка, отклики, первые интервью' },
+    2: { cls:'p3', title:'Этап 3 · Резерв — используется по необходимости', sub:'Дни 3–5* · сверх стандартного срока, до 5 дней максимум по ППК «Тестовый период»' },
+  };
+
+  function render(){
+    const daysEl = document.getElementById('days');
+    daysEl.innerHTML = '';
+    DAYS.forEach((day, idx)=>{
+      const doneCount = day.tasks.filter(t=>state.tasks[t.id]==='done').length;
+
+      const ph = PHASE_BANNERS[idx] || (idx===2 ? PHASE_BANNERS[2] : null);
+      if (ph && (idx===0 || idx===1 || idx===2)) {
+        const banner = document.createElement('div');
+        banner.className = 'phase-banner ' + ph.cls;
+        banner.innerHTML = `<span class="phase-banner-title">${ph.title}</span><span class="phase-banner-sub">${ph.sub}</span>`;
+        daysEl.appendChild(banner);
+      }
+
+      const wrap = document.createElement('div');
+      wrap.className = 'day' + (idx===0 ? ' open' : '') + (day.reserve ? ' reserve' : '');
+      wrap.innerHTML = `
+        <div class="day-head" data-day="${day.id}">
+          <div class="badge">${idx+1}</div>
+          <h2>${day.title}</h2>
+          <div class="count">${doneCount}/${day.tasks.length}</div>
+          <div class="chev">▾</div>
+        </div>
+        <div class="day-body">
+          ${day.tasks.map(t=>taskHtml(t)).join('')}
+        </div>`;
+      daysEl.appendChild(wrap);
+    });
+
+    document.querySelectorAll('.day-head').forEach(h=>{
+      h.addEventListener('click', ()=>{
+        h.closest('.day').classList.toggle('open');
+      });
+    });
+    document.querySelectorAll('.status-btn').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        const cur = state.tasks[id] || 'none';
+        const next = STATES[(STATES.indexOf(cur)+1) % STATES.length];
+        state.tasks[id] = next;
+        save();
+        render();
+      });
+    });
+    document.querySelectorAll('.note-row input').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        state.notes[inp.dataset.id] = inp.value;
+        save();
+      });
+    });
+
+    renderAssessments();
+    updateRoute();
+  }
+
+  function taskHtml(t){
+    const st = state.tasks[t.id] || 'none';
+    const note = state.notes[t.id] || '';
+    return `
+      <div class="task ${t.policy?'policy':''}">
+        <button class="status-btn" data-id="${t.id}" data-state="${st}" aria-label="Статус задачи"></button>
+        <div class="task-body">
+          <div class="task-top">
+            <span class="task-title">${t.title}</span>
+            ${t.policy ? '<span class="tag-test">регламент</span>' : ''}
+          </div>
+          <div class="task-desc">${t.desc}</div>
+          <div class="state-label">${STATE_LABEL[st]}</div>
+          <div class="note-row"><input type="text" data-id="${t.id}" placeholder="Инициалы / дата" value="${note.replace(/"/g,'&quot;')}"></div>
+        </div>
+      </div>`;
+  }
+
+  function renderAssessments(){
+    const el = document.getElementById('assessments');
+    el.innerHTML = ASSESS.map((a,i)=>{
+      const id = 'a'+i;
+      const v = state.assess[id] || '';
+      const comment = state.assessComment[id] || '';
+      return `
+        <div class="assess-card">
+          <div class="assess-top">
+            <div class="assess-num">${i+1}</div>
+            <div class="assess-title">${a.title}</div>
+          </div>
+          <div class="assess-grid">
+            <div><span class="lbl">Что проверяем</span>${a.kpi}</div>
+            <div><span class="lbl">Критерий успешного выполнения</span>${a.crit}</div>
+          </div>
+          <div class="verdict-row">
+            <select class="verdict" data-id="${id}" data-v="${v}">
+              <option value="">Оценка…</option>
+              <option value="ok" ${v==='ok'?'selected':''}>Соответствует</option>
+              <option value="partial" ${v==='partial'?'selected':''}>Частично</option>
+              <option value="no" ${v==='no'?'selected':''}>Не соответствует</option>
+            </select>
+            <input class="comment" data-id="${id}" placeholder="Комментарий" value="${comment.replace(/"/g,'&quot;')}">
+          </div>
+        </div>`;
+    }).join('');
+
+    el.querySelectorAll('select.verdict').forEach(sel=>{
+      sel.addEventListener('change', ()=>{
+        state.assess[sel.dataset.id] = sel.value;
+        sel.dataset.v = sel.value;
+        save();
+      });
+    });
+    el.querySelectorAll('input.comment').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        state.assessComment[inp.dataset.id] = inp.value;
+        save();
+      });
+    });
+  }
+
+  function updateRoute(){
+    const ids = allTaskIds();
+    const done = ids.filter(id=>state.tasks[id]==='done').length;
+    const pct = Math.round((done/ids.length)*100);
+    document.getElementById('routeFill').style.width = pct+'%';
+    document.getElementById('routeTruck').style.left = pct+'%';
+    document.getElementById('routePct').textContent = pct+'% пройдено ('+done+'/'+ids.length+')';
+  }
+
+  function bindHeader(){
+    const nameInp = document.getElementById('employeeName');
+    nameInp.value = state.employeeName;
+    nameInp.addEventListener('input', ()=>{ state.employeeName = nameInp.value; save(); });
+
+    const mpaInp = document.getElementById('mpaName');
+    mpaInp.value = state.mpaName;
+    mpaInp.addEventListener('input', ()=>{ state.mpaName = mpaInp.value; save(); });
+
+    const mentorInp = document.getElementById('mentorName');
+    mentorInp.value = state.mentorName;
+    mentorInp.addEventListener('input', ()=>{ state.mentorName = mentorInp.value; save(); });
+
+    const managerInp = document.getElementById('managerName');
+    managerInp.value = state.managerName;
+    managerInp.addEventListener('input', ()=>{ state.managerName = managerInp.value; save(); });
+
+    const dateInp = document.getElementById('startDate');
+    dateInp.value = state.startDate;
+    dateInp.addEventListener('input', ()=>{ state.startDate = dateInp.value; save(); });
+
+    const fv = document.getElementById('finalVerdict');
+    fv.value = state.finalVerdict;
+    fv.addEventListener('change', ()=>{
+      state.finalVerdict = fv.value;
+      if(fv.value && !state.finalDate){
+        state.finalDate = new Date().toISOString().slice(0,10);
+        document.getElementById('finalDateShown').innerHTML = '<b>'+state.finalDate+'</b>Дата заключения';
+      }
+      save();
+    });
+    if(state.finalDate){
+      document.getElementById('finalDateShown').innerHTML = '<b>'+state.finalDate+'</b>Дата заключения';
+    }
+
+    const fc = document.getElementById('finalComment');
+    fc.value = state.finalComment;
+    fc.addEventListener('input', ()=>{ state.finalComment = fc.value; save(); });
+
+    const fsn = document.getElementById('finalSignName');
+    fsn.value = state.finalSignName;
+    fsn.addEventListener('input', ()=>{ state.finalSignName = fsn.value; save(); });
+
+    document.getElementById('resetBtn').addEventListener('click', async ()=>{
+      if(!confirm('Сбросить весь прогресс по дорожной карте?')) return;
+      state = {employeeName:'', mpaName:'', mentorName:'', managerName:'', startDate:'', tasks:{}, notes:{}, assess:{}, assessComment:{}, finalVerdict:'', finalComment:'', finalSignName:'', finalDate:''};
+      const KEY = 'lfb-hr-recruiter-roadmap-503812';
+      try{ await window.storage.delete(KEY, false); }catch(e){}
+      try{ localStorage.removeItem(KEY); }catch(e){}
+      document.getElementById('finalDateShown').innerHTML = '<b>—</b>Дата заключения';
+      render();
+      bindHeader();
+    });
+  }
+
+  const STORAGE_KEY = 'lfb-hr-recruiter-roadmap-503812';
+  const hasAppStorage = () => (typeof window.storage !== 'undefined' && window.storage && typeof window.storage.set === 'function');
+
+  let saveTimer = null;
+  function save(){
+    const hint = document.getElementById('saveHint');
+    if(hint) hint.textContent = 'сохранение…';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async ()=>{
+      const payload = JSON.stringify(state);
+      if(hasAppStorage()){
+        try{
+          await window.storage.set(STORAGE_KEY, payload, false);
+          if(hint) hint.textContent = 'сохранено ✓ (синхронизировано с аккаунтом)';
+          return;
+        }catch(e){ /* fall through to localStorage below */ }
+      }
+      try{
+        localStorage.setItem(STORAGE_KEY, payload);
+        if(hint) hint.textContent = 'сохранено в этом браузере ✓';
+      }catch(e){
+        if(hint) hint.textContent = 'не удалось сохранить прогресс';
+      }
+    }, 300);
+  }
+
+  async function load(){
+    let loaded = false;
+    if(hasAppStorage()){
+      try{
+        const res = await window.storage.get(STORAGE_KEY, false);
+        if(res && res.value){
+          state = Object.assign(state, JSON.parse(res.value));
+          loaded = true;
+        }
+      }catch(e){ /* no saved state yet via app storage */ }
+    }
+    if(!loaded){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(raw) state = Object.assign(state, JSON.parse(raw));
+      }catch(e){ /* no local save either — start fresh */ }
+    }
+    render();
+    bindHeader();
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>
